@@ -1,0 +1,9 @@
+# Фрагмент config/services.yaml продукта после opt-in Tariffication.
+# Полный чеклист: sibling tariffication/INTEGRATION.md
+
+services:
+    IWD\TarifficationSdk\TarifficationClient:
+        arguments:
+            $httpClient: '@http_client'
+            $baseUrl: '%env(TARIFFICATION_BASE_URL)%'
+            $token: '%env(PLATFORM_SERVICE_TOKEN)%'

@@ -1,0 +1,24 @@
+{
+    "name": "intellect-web-development/tariffication-sdk",
+    "description": "HTTP-клиент универсального сервиса Tariffication (тарифы: каталог, лимиты, цены услуг, доступы и подписки)",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "IWD\\TarifficationSdk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "IWD\\TarifficationSdk\\Tests\\": "tests/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.3",
+        "symfony/http-client": "^7.1 || ^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    }
+}
