@@ -151,13 +151,32 @@ final class TarifficationClientTest extends TestCase
         $created = $this->client('{"access":' . self::ACCESS . '}', 201)->grantAccess(userId: 77, tariffPriceId: 5, reference: 'payment:42', tariffAutoRenewal: true);
 
         self::assertSame('http://tariffication.test/api/sdk/users/77/accesses', $this->captured['url']);
-        self::assertSame(['tariffPriceId' => 5, 'reference' => 'payment:42', 'tariffAutoRenewal' => true], $this->body());
+        self::assertSame(['tariffPriceId' => 5, 'reference' => 'payment:42', 'tariffAutoRenewal' => true, 'onlyIfNoActive' => false], $this->body());
         self::assertFalse($created->replayed);
+        self::assertFalse($created->skipped);
 
         $replayed = $this->client('{"access":' . self::ACCESS . '}', 200)->grantAccess(userId: 77, tariffPriceId: 5, reference: 'payment:42');
 
         self::assertTrue($replayed->replayed);
+        self::assertFalse($replayed->skipped);
         self::assertSame('15', $replayed->access->id);
+    }
+
+    public function testGrantAccessOnlyIfNoActiveReportsSkip(): void
+    {
+        $skipped = $this->client('{"access":' . self::ACCESS . ',"skipped":true}', 200)
+            ->grantAccess(userId: 77, tariffPriceId: 5, reference: 'free:77', onlyIfNoActive: true);
+
+        self::assertTrue($this->body()['onlyIfNoActive']);
+        self::assertTrue($skipped->skipped);
+        self::assertFalse($skipped->replayed);
+        self::assertSame('15', $skipped->access->id);
+
+        $granted = $this->client('{"access":' . self::ACCESS . ',"skipped":false}', 201)
+            ->grantAccess(userId: 77, tariffPriceId: 5, reference: 'free:77', onlyIfNoActive: true);
+
+        self::assertFalse($granted->skipped);
+        self::assertFalse($granted->replayed);
     }
 
     public function testGrantAccessValidatesReference(): void

@@ -44,11 +44,17 @@ $quote = $client->quote(userId: 77, serviceCode: 'trade_signals', volume: '10000
 
 // Покупка: продукт списал деньги, затем фиксирует доступ. Повтор с тем же reference безопасен
 $granted = $client->grantAccess(userId: 77, tariffPriceId: 5, reference: 'payment:42', tariffAutoRenewal: true);
+
+// Стартовый (бесплатный) тариф: выдать, только если у пользователя нет действующего доступа
+$free = $client->grantAccess(userId: 77, tariffPriceId: 1, reference: 'free:77', onlyIfNoActive: true);
+if ($free->skipped) {
+    // у пользователя уже есть действующий доступ (он в $free->access), ничего не изменилось
+}
 ```
 
 ## Согласованность
 
-Общей транзакции с БД продукта нет. Каждая выдача и продление несёт `reference` — ключ идемпотентности (до 128 символов): повтор с теми же параметрами возвращает исходный доступ (`replayed === true`), с другими — `TarifficationApiException::REFERENCE_CONFLICT`. Рекомендуемый порядок: списать деньги → `grantAccess` → при сбое после списания откатить проводки, при сбое после выдачи — `revokeAccess`.
+Общей транзакции с БД продукта нет. Каждая выдача и продление несёт `reference` — ключ идемпотентности (до 128 символов): повтор с теми же параметрами возвращает исходный доступ (`replayed === true`), с другими — `TarifficationApiException::REFERENCE_CONFLICT`. `grantAccess(..., onlyIfNoActive: true)` не отзывает действующий доступ: если он есть, выдачи нет, а результат несёт `skipped === true` и действующий доступ. Рекомендуемый порядок: списать деньги → `grantAccess` → при сбое после списания откатить проводки, при сбое после выдачи — `revokeAccess`.
 
 ## Ошибки
 

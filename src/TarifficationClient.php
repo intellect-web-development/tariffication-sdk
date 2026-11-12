@@ -170,15 +170,24 @@ final readonly class TarifficationClient
     /**
      * Подключает тариф по цене. Действующий доступ пользователя отзывается, его подписка прекращается.
      * Деньги к этому моменту уже списаны продуктом.
+     *
+     * С `$onlyIfNoActive` действующий доступ не трогается: если он есть, ничего не выдаётся и в результате
+     * приходит он сам с `skipped === true`. Так выдают стартовый тариф, не перебивая купленный.
      */
-    public function grantAccess(int $userId, int|string $tariffPriceId, string $reference, bool $tariffAutoRenewal = false): GrantedAccess
-    {
+    public function grantAccess(
+        int $userId,
+        int|string $tariffPriceId,
+        string $reference,
+        bool $tariffAutoRenewal = false,
+        bool $onlyIfNoActive = false,
+    ): GrantedAccess {
         $this->assertReference($reference);
 
         return $this->mapGranted($this->request('POST', '/users/' . $this->userId($userId) . '/accesses', ['json' => [
             'tariffPriceId' => (int) $tariffPriceId,
             'reference' => $reference,
             'tariffAutoRenewal' => $tariffAutoRenewal,
+            'onlyIfNoActive' => $onlyIfNoActive,
         ]]));
     }
 
@@ -272,7 +281,13 @@ final readonly class TarifficationClient
      */
     private function mapGranted(array $response): GrantedAccess
     {
-        return new GrantedAccess(access: $this->mapAccess($response['data']['access']), replayed: 200 === $response['status']);
+        $skipped = true === ($response['data']['skipped'] ?? false);
+
+        return new GrantedAccess(
+            access: $this->mapAccess($response['data']['access']),
+            replayed: 200 === $response['status'] && !$skipped,
+            skipped: $skipped,
+        );
     }
 
     /**
