@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Common\Tariffication;
+namespace IWD\TarifficationSdk\Examples\Symfony;
 
 use IWD\TarifficationSdk\TarifficationApiException;
 use IWD\TarifficationSdk\TarifficationClient;
@@ -10,8 +10,9 @@ use IWD\TarifficationSdk\UserTariff;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientException;
 
 /**
- * Пример адаптера продукта к сервису Tariffication. Домен продукта SDK не импортирует:
- * ошибки сервиса переводятся в собственные исключения продукта.
+ * Пример адаптера продукта к сервису Tariffication.
+ * В продукте копируйте в App\Common\Tariffication (или свой BC); домен SDK не импортирует.
+ * Ошибки сервиса переводятся в собственные исключения продукта.
  */
 final readonly class TarifficationGateway
 {
