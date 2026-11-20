@@ -11,7 +11,7 @@ use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpClientExcep
 
 /**
  * Пример адаптера продукта к сервису Tariffication.
- * В продукте копируйте в App\Common\Tariffication (или свой BC); домен SDK не импортирует.
+ * В продукте копируйте в App\PlatformProjection\Tariffication (или свой BC); домен SDK не импортирует.
  * Ошибки сервиса переводятся в собственные исключения продукта.
  */
 final readonly class TarifficationGateway
